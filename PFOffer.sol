@@ -42,6 +42,7 @@ along with the DAO.  If not, see <http://www.gnu.org/licenses/>.
   member attributes are read correctly. This comment will be updated as soon
   as the fix makes it into a solc release.
 */
+pragma solidity ^0.4.11;
 
 import "./DAO.sol";
 

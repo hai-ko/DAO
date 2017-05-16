@@ -31,6 +31,7 @@ along with the DAO.  If not, see <http://www.gnu.org/licenses/>.
                 the Offer, can adjust daily withdraw limit or even fire the
                 Contractor.
 */
+pragma solidity ^0.4.11;
 
 import "./DAO.sol";
 

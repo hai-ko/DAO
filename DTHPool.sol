@@ -14,6 +14,7 @@ GNU lesser General Public License for more details.
 You should have received a copy of the GNU lesser General Public License
 along with the DAO.  If not, see <http://www.gnu.org/licenses/>.
 */
+pragma solidity ^0.4.11;
 
 import "./libs/oraclize.sol";
 import "./Token.sol";

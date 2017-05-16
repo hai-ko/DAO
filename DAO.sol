@@ -20,6 +20,7 @@ along with the DAO.  If not, see <http://www.gnu.org/licenses/>.
 Standard smart contract for a Decentralized Autonomous Organization (DAO)
 to automate organizational governance and decision-making.
 */
+pragma solidity ^0.4.11;
 
 import "./TokenCreation.sol";
 import "./ManagedAccount.sol";
@@ -160,7 +161,7 @@ contract DAOInterface {
     }
 
     // Used to restrict access to certain functions to only DAO Token Holders
-    modifier onlyTokenholders {}
+    modifier onlyTokenholders {_;}
 
     /// @dev Constructor setting the Curator and the address
     /// for the contract able to create another DAO as well as the parameters
@@ -192,7 +193,7 @@ contract DAOInterface {
 
     /// @notice Create Token with `msg.sender` as the beneficiary
     /// @return Whether the token creation was successful
-    function () returns (bool success);
+    function ();
 
 
     /// @dev This function is used to send ether back
@@ -267,10 +268,10 @@ contract DAOInterface {
     /// will create a new DAO and send the sender's portion of the remaining
     /// ether and Reward Tokens to the new DAO. It will also burn the DAO Tokens
     /// of the sender.
-    function splitDAO(
-        uint _proposalID,
-        address _newCurator
-    ) returns (bool _success);
+    // function splitDAO(
+    //     uint _proposalID,
+    //     address _newCurator
+    // ) returns (bool _success);
 
     /// @dev can only be called by the DAO itself through a proposal
     /// updates the contract of the DAO by sending all ether and rewardTokens
@@ -368,7 +369,7 @@ contract DAO is DAOInterface, Token, TokenCreation {
     // Modifier that allows only shareholders to vote and create new proposals
     modifier onlyTokenholders {
         if (balanceOf(msg.sender) == 0) throw;
-            _
+            _;
     }
 
     function DAO(
@@ -406,11 +407,11 @@ contract DAO is DAOInterface, Token, TokenCreation {
         allowedRecipients[curator] = true;
     }
 
-    function () returns (bool success) {
+    function () {
         if (now < closingTime + creationGracePeriod && msg.sender != address(extraBalance))
-            return createTokenProxy(msg.sender);
+            return;
         else
-            return receiveEther();
+            return;
     }
 
 
@@ -735,79 +736,79 @@ contract DAO is DAOInterface, Token, TokenCreation {
         return true;
     }
 
-    function splitDAO(
-        uint _proposalID,
-        address _newCurator
-    ) noEther onlyTokenholders returns (bool _success) {
+    // function splitDAO(
+    //     uint _proposalID,
+    //     address _newCurator
+    // ) noEther onlyTokenholders returns (bool _success) {
 
-        Proposal p = proposals[_proposalID];
+    //     Proposal p = proposals[_proposalID];
 
-        // Sanity check
+    //     // Sanity check
 
-        if (now < p.votingDeadline  // has the voting deadline arrived?
-            //The request for a split expires XX days after the voting deadline
-            || now > p.votingDeadline + splitExecutionPeriod
-            // Does the new Curator address match?
-            || p.recipient != _newCurator
-            // Is it a new curator proposal?
-            || !p.newCurator
-            // Have you voted for this split?
-            || !p.votedYes[msg.sender]) {
+    //     if (now < p.votingDeadline  // has the voting deadline arrived?
+    //         //The request for a split expires XX days after the voting deadline
+    //         || now > p.votingDeadline + splitExecutionPeriod
+    //         // Does the new Curator address match?
+    //         || p.recipient != _newCurator
+    //         // Is it a new curator proposal?
+    //         || !p.newCurator
+    //         // Have you voted for this split?
+    //         || !p.votedYes[msg.sender]) {
 
-            throw;
-        }
+    //         throw;
+    //     }
 
-        unVoteAll();
+    //     unVoteAll();
 
-        // If the new DAO doesn't exist yet, create the new DAO and store the
-        // current split data
-        if (address(p.splitData[0].newDAO) == 0) {
-            p.splitData[0].newDAO = createNewDAO(_newCurator);
-            // Call depth limit reached, etc.
-            if (address(p.splitData[0].newDAO) == 0)
-                throw;
-            // should never happen
-            if (this.balance < sumOfProposalDeposits)
-                throw;
-            p.splitData[0].splitBalance = actualBalance();
-            p.splitData[0].rewardToken = rewardToken[address(this)];
-            p.splitData[0].totalSupply = totalSupply;
-            p.proposalPassed = true;
-        }
+    //     // If the new DAO doesn't exist yet, create the new DAO and store the
+    //     // current split data
+    //     if (address(p.splitData[0].newDAO) == 0) {
+    //         p.splitData[0].newDAO = createNewDAO(_newCurator);
+    //         // Call depth limit reached, etc.
+    //         if (address(p.splitData[0].newDAO) == 0)
+    //             throw;
+    //         // should never happen
+    //         if (this.balance < sumOfProposalDeposits)
+    //             throw;
+    //         p.splitData[0].splitBalance = actualBalance();
+    //         p.splitData[0].rewardToken = rewardToken[address(this)];
+    //         p.splitData[0].totalSupply = totalSupply;
+    //         p.proposalPassed = true;
+    //     }
 
-        // Move ether and assign new Tokens
-        uint fundsToBeMoved =
-            (balances[msg.sender] * p.splitData[0].splitBalance) /
-            p.splitData[0].totalSupply;
-        if (p.splitData[0].newDAO.createTokenProxy.value(fundsToBeMoved)(msg.sender) == false)
-            throw;
+    //     // Move ether and assign new Tokens
+    //     uint fundsToBeMoved =
+    //         (balances[msg.sender] * p.splitData[0].splitBalance) /
+    //         p.splitData[0].totalSupply;
+    //     if (p.splitData[0].newDAO.createTokenProxy.value(fundsToBeMoved)(msg.sender) == false)
+    //         throw;
 
-        // Assign reward rights to new DAO
-        uint rewardTokenToBeMoved =
-            (balances[msg.sender] * p.splitData[0].rewardToken) /
-            p.splitData[0].totalSupply;
+    //     // Assign reward rights to new DAO
+    //     uint rewardTokenToBeMoved =
+    //         (balances[msg.sender] * p.splitData[0].rewardToken) /
+    //         p.splitData[0].totalSupply;
 
-        uint paidOutToBeMoved = DAOpaidOut[address(this)] * rewardTokenToBeMoved /
-            rewardToken[address(this)];
+    //     uint paidOutToBeMoved = DAOpaidOut[address(this)] * rewardTokenToBeMoved /
+    //         rewardToken[address(this)];
 
-        rewardToken[address(p.splitData[0].newDAO)] += rewardTokenToBeMoved;
-        if (rewardToken[address(this)] < rewardTokenToBeMoved)
-            throw;
-        rewardToken[address(this)] -= rewardTokenToBeMoved;
+    //     rewardToken[address(p.splitData[0].newDAO)] += rewardTokenToBeMoved;
+    //     if (rewardToken[address(this)] < rewardTokenToBeMoved)
+    //         throw;
+    //     rewardToken[address(this)] -= rewardTokenToBeMoved;
 
-        DAOpaidOut[address(p.splitData[0].newDAO)] += paidOutToBeMoved;
-        if (DAOpaidOut[address(this)] < paidOutToBeMoved)
-            throw;
-        DAOpaidOut[address(this)] -= paidOutToBeMoved;
+    //     DAOpaidOut[address(p.splitData[0].newDAO)] += paidOutToBeMoved;
+    //     if (DAOpaidOut[address(this)] < paidOutToBeMoved)
+    //         throw;
+    //     DAOpaidOut[address(this)] -= paidOutToBeMoved;
 
-        // Burn DAO Tokens
-        Transfer(msg.sender, 0, balances[msg.sender]);
-        withdrawRewardFor(msg.sender); // be nice, and get his rewards
-        totalSupply -= balances[msg.sender];
-        balances[msg.sender] = 0;
-        paidOut[msg.sender] = 0;
-        return true;
-    }
+    //     // Burn DAO Tokens
+    //     Transfer(msg.sender, 0, balances[msg.sender]);
+    //     withdrawRewardFor(msg.sender); // be nice, and get his rewards
+    //     totalSupply -= balances[msg.sender];
+    //     balances[msg.sender] = 0;
+    //     paidOut[msg.sender] = 0;
+    //     return true;
+    // }
 
     function newContract(address _newContract){
         if (msg.sender != address(this) || !allowedRecipients[_newContract]) return;

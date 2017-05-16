@@ -27,6 +27,7 @@ along with the DAO.  If not, see <http://www.gnu.org/licenses/>.
  * deployed per participant, usually using a middleware layer on a webserver,
  * for example.
 */
+pragma solidity ^0.4.11;
 
 import "./TokenCreation.sol";
 

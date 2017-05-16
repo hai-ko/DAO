@@ -20,6 +20,7 @@ along with the DAO.  If not, see <http://www.gnu.org/licenses/>.
 Basic account, used by the DAO contract to separately manage both the rewards 
 and the extraBalance accounts. 
 */
+pragma solidity ^0.4.11;
 
 contract ManagedAccountInterface {
     // The only address with permission to withdraw from this account

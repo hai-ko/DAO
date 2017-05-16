@@ -21,6 +21,7 @@ along with the DAO.  If not, see <http://www.gnu.org/licenses/>.
  * its ether. Feel free to modify the divisor method to implement different
  * Token Creation parameters
 */
+pragma solidity ^0.4.11;
 
 import "./Token.sol";
 import "./ManagedAccount.sol";
